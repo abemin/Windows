@@ -1,44 +1,33 @@
-@echo off 
-echo Notice: Make sure you are running this script as Admin, Otherwise it won't work! (right click on the script, click "Run As Administrator")
-echo Choose: 
-echo [A] Set Static IP 
-echo [B] Set DHCP 
-echo. 
-:choice 
-SET /P C=[A,B]? 
-for %%? in (A) do if /I "%C%"=="%%?" goto A 
-for %%? in (B) do if /I "%C%"=="%%?" goto B 
-goto choice 
-
-:A 
-@echo off 
-echo "Please enter Static IP Address Information" 
-echo "Static IP Address:" 
-set /p IP_Addr=
-
-echo "Subnet Mask:" 
-set /p Sub_Mask=
-
-echo "Default Gateway:" 
-set /p D_Gate=
-
-echo "Setting Static IP Information" 
-netsh interface ip set address name="Local Area Connection" static %IP_Addr% %Sub_Mask% %D_Gate%
-netsh int ip show config 
-pause 
+@ECHO off
+cls
+:start
+ECHO.
+ECHO 1. Change Ethernet Static IP 
+ECHO 2. Obtain an IP address automatically
+ECHO 3. Exit
+set choice=
+set /p choice=Type the number to print text.
+if not '%choice%'=='' set choice=%choice:~0,1%
+if '%choice%'=='1' goto con1
+if '%choice%'=='2' goto autosearch
+if '%choice%'=='3' goto end
+ECHO "%choice%" is not valid, try again
+ECHO.
+goto start
+:con1
+ECHO Connecting Ethernet
+netsh interface ip set address "Ethernet 2" static 172.22.1.94 255.255.255.128 172.22.1.3
+netsh interface ip set dns "Ethernet 2" static 192.168.240.18
 goto end
 
-:B 
-@ECHO OFF 
-ECHO Resetting IP Address and Subnet Mask For DHCP 
-netsh int ip set address name = "Local Area Connection" source = dhcp
+:autosearch
+ECHO obtaining auto IP
+netsh interface ip set address "Ethernet 2" dhcp
+netsh interface ip set dns "Ethernet 2" dhcp
+goto end
 
-ipconfig /renew
-
-ECHO Here are the new settings for %computername%: 
-netsh int ip show config
-
-pause 
-goto end 
+:bye
+ECHO BYE
+goto end
 
 :end
